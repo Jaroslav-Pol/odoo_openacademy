@@ -56,6 +56,8 @@ class Session(models.Model):
     attendee_ids = fields.Many2many('res.partner', string="Attendees")
 
     taken_seats = fields.Float(string="Taken seats", compute='_taken_seats')
+    attendees_count = fields.Integer(
+        string="Attendees count", compute='_get_attendees_count', store=True)
 
 
     @api.depends('seats', 'attendee_ids')
@@ -109,3 +111,8 @@ class Session(models.Model):
         for record in self:
             if record.instructor_id and record.instructor_id in record.attendee_ids:
                 raise exceptions.ValidationError("A session's instructor can't be an attendee")
+
+    @api.depends('attendee_ids')
+    def _get_attendees_count(self):
+        for r in self:
+            r.attendees_count = len(r.attendee_ids)
